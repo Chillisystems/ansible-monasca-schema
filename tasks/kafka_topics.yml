@@ -1,13 +1,16 @@
 ---
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
+#
+# XXX: create kafka topics module
 - name: check topics
-  shell: /opt/kafka/bin/kafka-topics.sh --list --zookeeper {{zookeeper_hosts}} --topic {{item.key}} | grep {{item.key}}
-  with_dict: kafka_topics
+  shell: /opt/kafka/bin/kafka-topics.sh --list --zookeeper {{ zookeeper_hosts }} --topic {{ item.key }} | grep -q {{ item.key }}
+  with_dict: '{{ kafka_topics }}'
   ignore_errors: yes
+  changed_when: False
   register: check_result
 
 - name: create topics
-  command: /opt/kafka/bin/kafka-topics.sh --create --zookeeper {{zookeeper_hosts}} --replication-factor {{item.value.replicas}} --partitions {{item.value.partitions}} --topic {{item.key}}
-  with_dict: kafka_topics
+  command: /opt/kafka/bin/kafka-topics.sh --create --zookeeper {{ zookeeper_hosts }} --replication-factor {{ item.value.replicas }} --partitions {{ item.value.partitions }} --topic {{ item.key }}
+  with_dict: '{{ kafka_topics }}'
   when: check_result|failed

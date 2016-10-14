@@ -1,59 +1,77 @@
 ---
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
+#
+# Monasca InfluxDB settings
+#
 
-influxdb_schema_enabled: true
-kafka_topics_enabled: true
-mysql_schema_enabled: true
-postgres_schema_enabled: false
-winchester_schema_enabled: true
+influxdb_url: 'http://{{ influxdb_host }}:{{ influxdb_port }}'
+
+influxdb_host: localhost
+influxdb_port: 8086
 influxdb_admin: root
 influxdb_admin_password: root
-influxdb_dbname: mon
+
+influxdb_dbname: monasca
 influxdb_replication_factor: 1
 influxdb_retention_policy: "90d"
 influxdb_shard_duration: "7d"
-mysql_admin: root
-vertica_database_name: mon
-vertica_dbadmin_password: password
-vertica_env: {LC_ALL: en_US.UTF-8, LANG: en_US.UTF-8}
-vertica_schema_enabled: true
-vertica_retention_period: 30
-postgres_encoding: UTF8
-zookeeper_hosts: "localhost:2181"
-database_type: influxdb
 
-database_admin: postgres
-database_name: mon
-database_root_dir: /opt/monasca/sqls
-database_users: {}
+mon_influxdb_users:
+  - username: monasca
+    password: monasca
 
-monasca_schema_file: "{{database_root_dir}}/mon.sql"
-winchester_schema_file: "{{database_root_dir}}/winchester.sql"
+#
+# Monasca Mysql Settings
+#
+monasca_mysql_host: localhost
+monasca_mysql_admin: root
+monasca_mysql_admin_password: secrete
+monasca_mysql_db: mon
+
+monasca_sql_basedir: /opt/monasca/sqls
+monasca_schema_file: "{{ monasca_sql_basedir }}/mon.sql"
+
+#
+# Monasca Kafka settings
+#
+
+zookeeper_hosts: localhost:2181
 
 kafka_events_partitions: 12
 kafka_metrics_partitions: 64
 # This should be the number of systems running the Notification Engine
-kafka_retry_notifications_partitions: 3
-kafka_replicas: 3
+kafka_retry_notifications_partitions: 1
+kafka_replicas: 1
 
 kafka_topics:
-  metrics: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_metrics_partitions }}" }
-  events: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  raw-events: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  transformed-events: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  stream-definitions: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  transform-definitions: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  alarm-state-transitions: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  alarm-notifications: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  stream-notifications: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_events_partitions }}" }
-  retry-notifications: { replicas: "{{ kafka_replicas }}", partitions: "{{ kafka_retry_notifications_partitions }}" }
+  metrics:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_metrics_partitions }}"
+  events:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  raw-events:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  transformed-events:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  stream-definitions:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  transform-definitions:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  alarm-state-transitions:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  alarm-notifications:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  stream-notifications:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_events_partitions }}"
+  retry-notifications:
+    replicas: "{{ kafka_replicas }}"
+    partitions: "{{ kafka_retry_notifications_partitions }}"
 
-# migration pack is a array containing files names under files/migration/{db_name}
-# db_name can be either:
-# - mysql if mysql_schema_enabled
-# *.sql extension is by default assumed
-# migration_pack:
-#   - 'revert_enums_and_mediumtext'
-migration_pack_dir_dest: "{{ database_root_dir }}/migration"
-migration_pack_dir_src: migration/ #relative to files
-migration_pack: []

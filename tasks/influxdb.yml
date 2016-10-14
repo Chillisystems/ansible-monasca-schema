@@ -1,14 +1,49 @@
 ---
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
-# TODO I should create a module for the db/user operations, I tried using uri and even shell with curl directly but between the j2 and yaml
-# parsing I could never get it to escape the json correctly
 
-- name: Write out the influxdb setup script
-  template: dest=/opt/influxdb/influxdb_setup.py owner=root group=root mode=750 src=influxdb_setup.py.j2
+- name: Install influxdb libs
+  pip:
+    name: influxdb
+    state: present
 
-- name: Run the influxdb setup script
-  command: /opt/influxdb/influxdb_setup.py
-  register: result
-  until: result | success
-  retries: 5
-  delay: 2
+- name: Create influxdb database
+  environment:
+    http_proxy: ""
+    https_proxy: ""
+  influxdb_database:
+    hostname: "{{ influxdb_host }}"
+    port: "{{ influxdb_port }}"
+    username: "{{ influxdb_admin }}"
+    password: "{{ influxdb_admin_password }}"
+    database_name: "{{ influxdb_dbname }}"
+    state: present
+
+- name: Create influxdb retention policy for database
+  environment:
+    http_proxy: ""
+    https_proxy: ""
+  influxdb_retention_policy:
+    hostname: "{{ influxdb_host }}"
+    port: "{{ influxdb_port }}"
+    database_name: "{{ influxdb_dbname }}"
+    username: "{{ influxdb_admin }}"
+    password: "{{ influxdb_admin_password }}"
+    policy_name: persister_all
+    duration: "{{ influxdb_retention_policy }}"
+    replication: "{{ influxdb_replication_factor }}"
+
+- name: Create Influxdb users
+  environment:
+    http_proxy: ""
+    https_proxy: ""
+  influxdb_user:
+    hostname: "{{ influxdb_host }}"
+    port: "{{ influxdb_port }}"
+    database_name: "{{ influxdb_dbname }}"
+    username: "{{ influxdb_admin }}"
+    password: "{{ influxdb_admin_password }}"
+    user_name: "{{ item.username }}"
+    user_pass: "{{ item.password }}"
+  with_items:
+    - '{{ mon_influxdb_users }}'
+
