@@ -15,28 +15,25 @@
 #
 # (c) 2016 Donovan Francesco <donovan.francesco@is.co.za>
 # (c) 2016 Paul Stevens <paul.stevens@is.co.za>
+#TODO(evrardjp): Replace the next 2 tasks by a standard apt with cache
+#when https://github.com/ansible/ansible-modules-core/pull/1517 is merged
+#in 1.9.x or we move to 2.0 (if tested working)
 - name: Check apt last update file
   stat:
     path: /var/cache/apt
   register: apt_cache_stat
-  tags:
-    - monasca-apt-sources
 
 - name: Update apt if needed
   apt:
     update_cache: yes
   when: "ansible_date_time.epoch|float - apt_cache_stat.stat.mtime > {{cache_timeout}}"
-  tags:
-    - monasca-apt-sources
 
-- name: Install apt packages for monasca
+- name: Install apt packages
   apt:
     pkg: "{{ item }}"
-    state: "latest"
-  register: install_monasca_schema_distro_packages
-  until: install_monasca_schema_distro_packages |success
+    state: latest
+  register: install_packages
+  until: install_packages|success
   retries: 5
   delay: 2
-  with_items: "{{ monasca_schema_distro_packages }}"
-  tags:
-    - monasca-schema-distro-apt-packages
+  with_items: "{{ monasca_distro_apt_packages }}"
