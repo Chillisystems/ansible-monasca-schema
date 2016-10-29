@@ -22,3 +22,4 @@ monasca_distro_apt_packages:
   - build-essential
   - python-mysqldb
   - python-pip
+  - mariadb-client
