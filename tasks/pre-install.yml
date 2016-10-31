@@ -23,4 +23,4 @@
   until: install_packages|success
   retries: 5
   delay: 2
-  with_items: "{{ monasca_distro_apt_packages }}"
+  with_items: "{{ monasca_apt_packages }}"

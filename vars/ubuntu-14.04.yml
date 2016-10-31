@@ -18,7 +18,7 @@
 #
 # Originally obtained from https://github.com/elastic/ansible-elasticsearch
 #
-monasca_distro_apt_packages:
+monasca_apt_packages:
   - build-essential
   - python-mysqldb
   - python-pip
