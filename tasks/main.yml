@@ -1,6 +1,11 @@
 ---
 # ©Copyright 2015 Hewlett-Packard Development Company, L.P.
 
+- name: Gather variables for each operating system
+  include_vars: "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+
+- include: pre-install.yml
+
 - include: influxdb.yml
   tags: influxdb_schema
 
@@ -9,4 +14,3 @@
 
 - include: kafka_topics.yml
   tags: kafka_topics
-
